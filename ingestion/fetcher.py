@@ -22,7 +22,32 @@ class Document(BaseModel):
     author: str                          # GitHub username of the author
     created_at: datetime                 # Timestamp when created
     updated_at: datetime                 # Timestamp when last updated
-    url: str                             # URL link to the original GitHub item
+    
+# ==========================================
+# Day 4 - Task 1: Build the Cleanup Utility (Noise Reduction)
+# ==========================================
+import re
+
+# Set of automated system bot accounts to filter out
+BOT_USERNAMES = {
+    "dependabot[bot]",
+    "codspeed-hq[bot]",
+    "github-actions[bot]",
+    "sonarcloud[bot]",
+    "coveralls[bot]"
+}
+
+def clean_text(text: str) -> str:
+    """
+    Cleans raw Markdown/HTML text by removing comment wrappers and normalizing white space.
+    """
+    if not text:
+        return ""
+    # Strip HTML comments: <!-- comment -->
+    text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
+    # Remove excessive blank lines (3 or more) to clean up layout
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
 
 # ==========================================
 # Task 3: Implement README Fetching
@@ -37,8 +62,8 @@ def fetch_readme(repo) -> Document:
         # 1. Fetch the README metadata and content
         readme_file = repo.get_readme()
         
-        # 2. Decode the raw base64 content bytes to string
-        body_text = readme_file.decoded_content.decode("utf-8")
+        # 2. Decode and clean the raw base64 content bytes to string
+        body_text = clean_text(readme_file.decoded_content.decode("utf-8"))
         
         # 3. Create and return the standardized Document schema object
         return Document(
@@ -84,15 +109,25 @@ def fetch_issues(repo, limit: int = 50) -> list[Document]:
             
             print(f"  -> Processing {doc_type} #{issue.number}...")
             
-            # 3. Fetch all comments for this issue to combine into the body text
-            body_content = f"Title: {issue.title}\n\nDescription:\n{issue.body or ''}\n"
+            # 3. Fetch and clean description, and extract human-only comments
+            body_content = f"Title: {issue.title}\n\nDescription:\n{clean_text(issue.body or '')}\n"
             
             comments = issue.get_comments()
             if comments.totalCount > 0:
-                body_content += "\nComments:\n"
+                comment_blocks = []
                 for comment in comments:
-                    body_content += f"\n--- Comment by {comment.user.login} on {comment.created_at} ---\n"
-                    body_content += f"{comment.body or ''}\n"
+                    # Skip automated system bots to reduce noise in RAG search
+                    if comment.user.login in BOT_USERNAMES:
+                        continue
+                    
+                    cleaned_comment = clean_text(comment.body or "")
+                    if cleaned_comment:
+                        comment_blocks.append(
+                            f"\n--- Comment by {comment.user.login} on {comment.created_at} ---\n{cleaned_comment}\n"
+                        )
+                
+                if comment_blocks:
+                    body_content += "\nComments:\n" + "".join(comment_blocks)
             
             # 4. Standardize the issue/PR into a Document schema
             doc = Document(
@@ -154,8 +189,8 @@ if __name__ == "__main__":
             json.dump(readme_dict, f, indent=2, default=str)
         print(f"[SUCCESS] Saved README to: {readme_path}")
 
-        # 5. Fetch and save Issues (limit to 10 for fast testing)
-        issue_docs = fetch_issues(repo, limit=10)
+        # 5. Fetch and save Issues (limit to 30 for fast testing)
+        issue_docs = fetch_issues(repo, limit=30)
         
         issues_list = [
             doc.dict() if hasattr(doc, "dict") else doc.model_dump()
@@ -167,7 +202,7 @@ if __name__ == "__main__":
             json.dump(issues_list, f, indent=2, default=str)
         print(f"[SUCCESS] Saved {len(issues_list)} issues to: {issues_path}")
 
-        print("\n--- Ingestion Day 3 Task Completed Successfully! ---")
+        print("\n--- Ingestion Day 4 Task Completed Successfully! ---")
 
     except Exception as e:
         print(f"\n[ERROR] Ingestion pipeline failed: {str(e)}")
