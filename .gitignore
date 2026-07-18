@@ -46,3 +46,6 @@ qdrant_storage/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local Data
+data/
