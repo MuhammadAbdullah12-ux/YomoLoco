@@ -1,0 +1,92 @@
+[
+  {
+    "question": "What are the two core library dependencies that FastAPI stands on?",
+    "target_doc_ids": ["readme-fastapi/fastapi"],
+    "gold_answer": "FastAPI stands on Starlette for the web/routing capabilities, and Pydantic for data validation and schema handling.",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "How do you start a local development server for a FastAPI application?",
+    "target_doc_ids": ["readme-fastapi/fastapi"],
+    "gold_answer": "You can run the local development server using the FastAPI CLI command: 'fastapi dev', which automatically enables auto-reload mode.",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "What issue does PR 15993 address in OAuth2.__init__?",
+    "target_doc_ids": ["pr-15993"],
+    "gold_answer": "PR 15993 addresses a mutable default argument bug where 'OAuthFlowsModel()' was instantiated directly in the constructor parameters, sharing a single mutable instance. It resolves this by setting the default to 'None' and instantiating the model dynamically inside the function body.",
+    "category": "code_reference"
+  },
+  {
+    "question": "What optimization was introduced to APIRouter in pull request 15963?",
+    "target_doc_ids": ["pr-15963"],
+    "gold_answer": "PR 15963 implemented route caching for static paths in APIRouter to avoid redundant path calculations and speed up routing request lookups.",
+    "category": "code_reference"
+  },
+  {
+    "question": "Why does using 'from __future__ import annotations' cause ForwardRef warnings when using Annotated types defined below route decorators, and how is it fixed?",
+    "target_doc_ids": ["pr-15411"],
+    "gold_answer": "It evaluates the type definition as a plain 'ForwardRef' because the class name is parsed later in the file. Since the result is not recognized as an 'Annotated' type, FastAPI treats the parameter as a standard body field instead of a dependency. The PR resolves this by evaluating the ForwardRef using Python's 'eval' with a safe-globals dict that maps undefined names to ForwardRef objects.",
+    "category": "code_reference"
+  },
+  {
+    "question": "What causes thread deadlocks when running teardown in dependencies, and how does PR 15388 resolve it?",
+    "target_doc_ids": ["pr-15388"],
+    "gold_answer": "Deadlocks occur when a pool of threads uses the same capacity limiters for both acquiring and releasing resources. PR 15388 resolves this by creating a single global 'teardown' CapacityLimiter in AnyIO, separate from the primary thread workers.",
+    "category": "code_reference"
+  },
+  {
+    "question": "What performance bottleneck in 'jsonable_encoder' does pull request 15965 optimize?",
+    "target_doc_ids": ["pr-15965"],
+    "gold_answer": "PR 15965 optimizes a double-serialization bottleneck where 'jsonable_encoder' recursively traversed dictionaries that had already been compiled into JSON-native structures by Pydantic's internal Rust/C engine ('model_dump(mode=\"json\")'). It resolves this by short-circuiting and returning the Pydantic dict directly.",
+    "category": "code_reference"
+  },
+  {
+    "question": "What is the purpose of Swagger UI in a FastAPI application, and what is its standard URL path?",
+    "target_doc_ids": ["readme-fastapi/fastapi"],
+    "gold_answer": "Swagger UI is an interactive documentation page that allows developers to test API endpoints directly from the browser. It is accessible at the '/docs' path (e.g. 'http://127.0.0.1:8000/docs').",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "How do you declare optional query parameters in FastAPI route functions?",
+    "target_doc_ids": ["readme-fastapi/fastapi"],
+    "gold_answer": "By setting the parameter type to optional and assigning a default value of 'None' (e.g. 'q: str | None = None') inside the function signature.",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "How does the performance of FastAPI compare to NodeJS and Go?",
+    "target_doc_ids": ["readme-fastapi/fastapi"],
+    "gold_answer": "Independent benchmarks (TechEmpower) show that FastAPI applications running under Uvicorn perform on par with NodeJS and Go, making it one of the fastest Python frameworks available.",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "What alternative API documentation interface does FastAPI provide besides Swagger UI?",
+    "target_doc_ids": ["readme-fastapi/fastapi"],
+    "gold_answer": "FastAPI provides ReDoc as an alternative interactive API documentation interface, accessible at the '/redoc' path.",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "What changes did YuriiMotov make in PR 15967?",
+    "target_doc_ids": ["pr-15967"],
+    "gold_answer": "YuriiMotov fixed dead, broken, and redirecting links in the documentation that returned 404 errors or pointed to outdated content.",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "How does PR 15965 handle SQLAlchemy models safely while skipping recursive encoding?",
+    "target_doc_ids": ["pr-15965"],
+    "gold_answer": "It checks if the model has SQLAlchemy attributes and filters out internal state keys starting with '_sa' before returning the dictionary, maintaining safety while bypassing full recursive traversal.",
+    "category": "code_reference"
+  },
+  {
+    "question": "What capacity limit value was chosen for the teardown thread limiter in PR 15388 and why?",
+    "target_doc_ids": ["pr-15388"],
+    "gold_answer": "A limit value of 5 was chosen because a limit of 1 was too low (causing operations to serialize), while local testing showed no performance difference beyond a limit of 3.",
+    "category": "factual_lookup"
+  },
+  {
+    "question": "How does FastAPI perform data validation and conversion under the hood?",
+    "target_doc_ids": ["readme-fastapi/fastapi"],
+    "gold_answer": "FastAPI performs validation using Pydantic. It automatically parses input JSON, path, query, cookie, and header fields, converts them to Python types, and returns clear validation error messages if parameters are invalid.",
+    "category": "factual_lookup"
+  }
+]
