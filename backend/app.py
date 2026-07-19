@@ -8,6 +8,7 @@ from sqlmodel import Session, select
 
 from backend.database import init_db, get_session
 from backend.models import DocumentRecord, ChunkRecord, SyncLogRecord
+from ingestion.pipeline import SyncPipeline
 
 # Lifespan context manager to handle DB initialization on startup
 @asynccontextmanager
@@ -32,6 +33,23 @@ def compute_content_hash(text: str) -> str:
 @app.get("/")
 def read_root():
     return {"status": "online", "message": "RepoMind API Engine is running"}
+
+@app.post("/sync")
+def sync_full_pipeline(
+    repo: str = Query(default="fastapi/fastapi", description="GitHub Repository full name"),
+    force: bool = Query(default=False, description="Force re-chunking and re-embedding")
+):
+    """
+    Triggers the master RAG ingestion pipeline for a repository.
+    Applies SHA-256 diffing, text chunking, embedding, Qdrant upserts, and SQLModel metadata updates.
+    """
+    pipeline = SyncPipeline()
+    try:
+        summary = pipeline.sync_repository(repo=repo, force=force)
+    finally:
+        pipeline.close()
+    return summary
+
 
 @app.post("/repository")
 def sync_repository_metadata(
