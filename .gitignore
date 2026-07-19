@@ -49,3 +49,7 @@ Thumbs.db
 
 # Local Data
 data/
+*.db
+*.sqlite
+*.sqlite3
+

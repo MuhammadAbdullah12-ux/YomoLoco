@@ -1,0 +1,150 @@
+import os
+import hashlib
+import json
+from contextlib import asynccontextmanager
+from datetime import datetime
+from fastapi import FastAPI, Depends, HTTPException, Query
+from sqlmodel import Session, select
+
+from backend.database import init_db, get_session
+from backend.models import DocumentRecord, ChunkRecord, SyncLogRecord
+
+# Lifespan context manager to handle DB initialization on startup
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+app = FastAPI(
+    title="RepoMind RAG Backend",
+    description="Relational Metadata & RAG Retrieval API Engine",
+    version="0.1.0",
+    lifespan=lifespan
+)
+
+def compute_content_hash(text: str) -> str:
+    """
+    Computes SHA-256 hash string for raw text content.
+    Used for content mutation detection.
+    """
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+@app.get("/")
+def read_root():
+    return {"status": "online", "message": "RepoMind API Engine is running"}
+
+@app.post("/repository")
+def sync_repository_metadata(
+    repo: str = Query(default="fastapi/fastapi", description="GitHub Repository full name"),
+    session: Session = Depends(get_session)
+):
+    """
+    Seed/Sync metadata for raw ingested files into the database.
+    Calculates SHA-256 content_hash for mutation detection.
+    """
+    readme_path = "data/raw/readme.json"
+    issues_path = "data/raw/issues.json"
+    
+    docs_added = 0
+    docs_updated = 0
+    
+    # Process README if present
+    if os.path.exists(readme_path):
+        with open(readme_path, "r", encoding="utf-8") as f:
+            readme_data = json.load(f)
+            
+        doc_id = f"readme-{repo}"
+        content = readme_data.get("content", "")
+        c_hash = compute_content_hash(content)
+        
+        existing_doc = session.get(DocumentRecord, doc_id)
+        if not existing_doc:
+            new_doc = DocumentRecord(
+                doc_id=doc_id,
+                doc_type="readme",
+                repo=repo,
+                title="README.md",
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
+                url=f"https://github.com/{repo}/blob/main/README.md",
+                content_hash=c_hash
+            )
+            session.add(new_doc)
+            docs_added += 1
+        elif existing_doc.content_hash != c_hash:
+            existing_doc.content_hash = c_hash
+            existing_doc.updated_at = datetime.utcnow()
+            session.add(existing_doc)
+            docs_updated += 1
+
+    # Process Issues if present
+    if os.path.exists(issues_path):
+        with open(issues_path, "r", encoding="utf-8") as f:
+            issues_data = json.load(f)
+            
+        for item in issues_data:
+            number = item.get("number")
+            is_pr = "pull_request" in item or item.get("html_url", "").find("/pull/") != -1
+            doc_type = "pr" if is_pr else "issue"
+            doc_id = f"{doc_type}-{number}"
+            
+            title = item.get("title", "")
+            body = item.get("body", "") or ""
+            content = f"Title: {title}\nDescription: {body}"
+            c_hash = compute_content_hash(content)
+            
+            created_at_str = item.get("created_at")
+            created_at = datetime.fromisoformat(created_at_str.replace("Z", "+00:00")) if created_at_str else datetime.utcnow()
+            
+            updated_at_str = item.get("updated_at")
+            updated_at = datetime.fromisoformat(updated_at_str.replace("Z", "+00:00")) if updated_at_str else datetime.utcnow()
+            
+            existing_doc = session.get(DocumentRecord, doc_id)
+            if not existing_doc:
+                new_doc = DocumentRecord(
+                    doc_id=doc_id,
+                    doc_type=doc_type,
+                    repo=repo,
+                    title=title,
+                    created_at=created_at,
+                    updated_at=updated_at,
+                    url=item.get("html_url", ""),
+                    content_hash=c_hash
+                )
+                session.add(new_doc)
+                docs_added += 1
+            elif existing_doc.content_hash != c_hash:
+                existing_doc.content_hash = c_hash
+                existing_doc.updated_at = updated_at
+                session.add(existing_doc)
+                docs_updated += 1
+                
+    # Create sync log entry
+    sync_log = SyncLogRecord(
+        repo=repo,
+        last_synced_at=datetime.utcnow(),
+        docs_added=docs_added,
+        docs_updated=docs_updated
+    )
+    session.add(sync_log)
+    session.commit()
+    
+    return {
+        "status": "success",
+        "repo": repo,
+        "docs_added": docs_added,
+        "docs_updated": docs_updated,
+        "timestamp": sync_log.last_synced_at
+    }
+
+@app.get("/documents")
+def get_documents(
+    repo: str = Query(default="fastapi/fastapi"),
+    session: Session = Depends(get_session)
+):
+    """
+    Retrieves all ingested metadata documents for a given repository.
+    """
+    statement = select(DocumentRecord).where(DocumentRecord.repo == repo)
+    documents = session.exec(statement).all()
+    return {"repo": repo, "count": len(documents), "documents": documents}
