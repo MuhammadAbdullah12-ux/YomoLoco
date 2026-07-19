@@ -1,0 +1,32 @@
+[
+  {
+    "id": "q1",
+    "question": "How do I update mcp dependency version to 1.28.1?",
+    "target_keyword": "mcp",
+    "category": "dependencies"
+  },
+  {
+    "id": "q2",
+    "question": "How to fix mutable default OAuthFlowsModel in OAuth2 init?",
+    "target_keyword": "OAuthFlowsModel",
+    "category": "security"
+  },
+  {
+    "id": "q3",
+    "question": "How do I handle background tasks and request validation in FastAPI?",
+    "target_keyword": "FastAPI",
+    "category": "core"
+  },
+  {
+    "id": "q4",
+    "question": "Concurrency database connection deadlock with anyio threadpool",
+    "target_keyword": "deadlock",
+    "category": "concurrency"
+  },
+  {
+    "id": "q5",
+    "question": "Interactive API docs and OpenAPI documentation generation in FastAPI",
+    "target_keyword": "docs",
+    "category": "documentation"
+  }
+]

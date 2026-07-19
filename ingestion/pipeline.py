@@ -124,7 +124,7 @@ class SyncPipeline:
                     "doc_type": doc_type,
                     "title": title,
                     "content": content,
-                    "url": item.get("html_url", ""),
+                    "url": item.get("url") or item.get("html_url") or f"https://github.com/{repo}/issues/{doc_id.split('-')[-1]}",
                     "created_at": c_at,
                     "updated_at": u_at
                 })
