@@ -97,7 +97,7 @@ class SyncPipeline:
                 "doc_id": f"readme-{repo}",
                 "doc_type": "readme",
                 "title": "README.md",
-                "content": readme_data.get("content", ""),
+                "content": readme_data.get("body") or readme_data.get("content") or "",
                 "url": f"https://github.com/{repo}/blob/main/README.md",
                 "created_at": datetime.utcnow(),
                 "updated_at": datetime.utcnow()
