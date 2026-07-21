@@ -6,3 +6,5 @@ psycopg2-binary>=2.9.6
 python-dotenv>=1.0.0
 PyGithub>=2.1.0
 sentence-transformers>=2.2.0
+google-genai>=0.1.1
+pydantic>=2.0

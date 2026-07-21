@@ -9,6 +9,9 @@ from sqlmodel import Session, select
 from backend.database import init_db, get_session
 from backend.models import DocumentRecord, ChunkRecord, SyncLogRecord
 from ingestion.pipeline import SyncPipeline
+from ingestion.ask_pipeline import AskPipeline
+from pydantic import BaseModel
+
 
 # Lifespan context manager to handle DB initialization on startup
 @asynccontextmanager
@@ -166,3 +169,19 @@ def get_documents(
     statement = select(DocumentRecord).where(DocumentRecord.repo == repo)
     documents = session.exec(statement).all()
     return {"repo": repo, "count": len(documents), "documents": documents}
+
+class AskRequest(BaseModel):
+    query: str
+
+@app.post("/ask")
+def ask_question(request: AskRequest):
+    """
+    Queries the repository using the end-to-end RAG pipeline (search -> rerank -> generate).
+    """
+    pipeline = AskPipeline()
+    try:
+        response = pipeline.ask(request.query)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    return response
+
