@@ -13,6 +13,9 @@ from backend.database import init_db, engine
 from backend.models import DocumentRecord, ChunkRecord, SyncLogRecord
 from ingestion.embedder import TextEmbedder
 from ingestion.splitter import split_readme, split_text_by_length
+from github import Github, GithubException
+from ingestion.fetcher import fetch_readme, fetch_issues
+
 
 # Safe print helper for Windows consoles
 def safe_print(text: str):
@@ -84,50 +87,74 @@ class SyncPipeline:
         print(f"Starting Master Sync Pipeline for: '{repo}'")
         print(f"=========================================")
         
-        readme_path = "data/raw/readme.json"
-        issues_path = "data/raw/issues.json"
+        token = os.getenv("GITHUB_TOKEN")
+        if not token:
+            raise ValueError("[ERROR] GITHUB_TOKEN is not configured in .env file or environment.")
+
+        # Connect to GitHub & fetch repository
+        g = Github(token)
+        repo_obj = g.get_repo(repo)
         
+        # Check GitHub API rate limits and back off if needed
+        try:
+            rate_limit = g.get_rate_limit()
+            rate = rate_limit.rate
+            print(f"[INFO] GitHub API Rate Limit: {rate.remaining}/{rate.limit} remaining (Resets at {rate.reset})")
+            if rate.remaining < 5:
+                import time
+                reset_timestamp = rate.reset.timestamp()
+                now_timestamp = datetime.now().timestamp()
+                sleep_time = max(0.0, reset_timestamp - now_timestamp) + 5
+                print(f"[WARNING] GitHub rate limit extremely low ({rate.remaining}). Sleeping for {sleep_time:.1f} seconds until reset...")
+                time.sleep(sleep_time)
+        except Exception as re:
+
+            print(f"[WARNING] Could not retrieve GitHub rate limit info: {re}")
+
         docs_to_process = []
         
-        # Load README
-        if os.path.exists(readme_path):
-            with open(readme_path, "r", encoding="utf-8") as f:
-                readme_data = json.load(f)
+        # 1. Fetch README
+        try:
+            readme_doc = fetch_readme(repo_obj)
             docs_to_process.append({
-                "doc_id": f"readme-{repo}",
-                "doc_type": "readme",
-                "title": "README.md",
-                "content": readme_data.get("body") or readme_data.get("content") or "",
-                "url": f"https://github.com/{repo}/blob/main/README.md",
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
+                "doc_id": readme_doc.doc_id,
+                "doc_type": readme_doc.doc_type,
+                "title": readme_doc.title,
+                "content": readme_doc.body,
+                "url": readme_doc.url,
+                "created_at": readme_doc.created_at,
+                "updated_at": readme_doc.updated_at
             })
-            
-        # Load Issues & PRs
-        if os.path.exists(issues_path):
-            with open(issues_path, "r", encoding="utf-8") as f:
-                issues_data = json.load(f)
-            for idx, item in enumerate(issues_data):
-                doc_id = item.get("doc_id") or f"issue-{item.get('number', idx)}"
-                doc_type = item.get("doc_type") or ("pr" if "pull_request" in item or item.get("html_url", "").find("/pull/") != -1 else "issue")
-                title = item.get("title", "")
-                body = item.get("body", "") or ""
-                content = body if body.startswith("Title:") else f"Title: {title}\nDescription: {body}"
-                
-                c_at_str = item.get("created_at")
-                c_at = datetime.fromisoformat(c_at_str.replace("Z", "+00:00")) if c_at_str else datetime.utcnow()
-                u_at_str = item.get("updated_at")
-                u_at = datetime.fromisoformat(u_at_str.replace("Z", "+00:00")) if u_at_str else datetime.utcnow()
-                
+        except GithubException as ge:
+            if ge.status == 403:
+                print(f"[ERROR] GitHub rate limit exceeded or access denied when fetching README: {ge.data.get('message', '')}")
+            else:
+                print(f"[WARNING] GitHub error fetching README.md: {ge}")
+        except Exception as e:
+            print(f"[WARNING] Failed to fetch live README.md: {e}")
+
+        # 2. Fetch Issues & PRs (limit to 30 for fast testing)
+        try:
+            issue_docs = fetch_issues(repo_obj, limit=30)
+            for doc in issue_docs:
                 docs_to_process.append({
-                    "doc_id": doc_id,
-                    "doc_type": doc_type,
-                    "title": title,
-                    "content": content,
-                    "url": item.get("url") or item.get("html_url") or f"https://github.com/{repo}/issues/{doc_id.split('-')[-1]}",
-                    "created_at": c_at,
-                    "updated_at": u_at
+                    "doc_id": doc.doc_id,
+                    "doc_type": doc.doc_type,
+                    "title": doc.title,
+                    "content": doc.body,
+                    "url": doc.url,
+                    "created_at": doc.created_at,
+                    "updated_at": doc.updated_at
                 })
+        except GithubException as ge:
+            if ge.status == 403:
+                print(f"[ERROR] GitHub rate limit exceeded or access denied when fetching issues/PRs: {ge.data.get('message', '')}")
+            else:
+                print(f"[WARNING] GitHub error fetching issues/PRs: {ge}")
+        except Exception as e:
+            print(f"[WARNING] Failed to fetch live issues/PRs: {e}")
+
+
 
         print(f"Loaded {len(docs_to_process)} raw documents to inspect.")
         

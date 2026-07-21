@@ -22,6 +22,7 @@ class Document(BaseModel):
     author: str                          # GitHub username of the author
     created_at: datetime                 # Timestamp when created
     updated_at: datetime                 # Timestamp when last updated
+    url: str                             # URL of the source document
     
 # ==========================================
 # Day 4 - Task 1: Build the Cleanup Utility (Noise Reduction)
