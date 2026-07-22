@@ -1,5 +1,10 @@
 import os
+import torch
+torch.set_num_threads(1)
 from sentence_transformers import SentenceTransformer
+
+
+_MODEL_CACHE = {}
 
 class TextEmbedder:
     """
@@ -7,11 +12,14 @@ class TextEmbedder:
     384-dimensional vector embeddings for chunked text.
     """
     def __init__(self, model_name: str = "BAAI/bge-small-en-v1.5"):
-        print(f"[RUNNING] Loading embedding model: {model_name}...")
-        # SentenceTransformer will download and cache the model weights locally
-        self.model = SentenceTransformer(model_name)
+        if model_name not in _MODEL_CACHE:
+            print(f"[RUNNING] Loading embedding model: {model_name}...")
+            # SentenceTransformer will download and cache the model weights locally
+            _MODEL_CACHE[model_name] = SentenceTransformer(model_name)
+            print(f"[SUCCESS] Model loaded successfully.")
+        self.model = _MODEL_CACHE[model_name]
         self.dimension = self.model.get_sentence_embedding_dimension()
-        print(f"[SUCCESS] Model loaded successfully. Dimensions: {self.dimension}")
+
 
     def embed_text(self, text: str) -> list[float]:
         """

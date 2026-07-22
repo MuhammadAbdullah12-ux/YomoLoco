@@ -1,7 +1,11 @@
 import os
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+
 import hashlib
 import json
 from contextlib import asynccontextmanager
+
 from datetime import datetime
 from fastapi import FastAPI, Depends, HTTPException, Query
 from sqlmodel import Session, select

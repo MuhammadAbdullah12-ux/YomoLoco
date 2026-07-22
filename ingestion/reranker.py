@@ -1,6 +1,11 @@
 import math
+import torch
+torch.set_num_threads(1)
 from typing import List, Dict, Any
 from sentence_transformers import CrossEncoder
+
+
+_RERANKER_CACHE = {}
 
 class BgeReranker:
     """
@@ -9,10 +14,13 @@ class BgeReranker:
     candidate document chunks retrieved from Stage 1 Vector Search.
     """
     def __init__(self, model_name: str = "BAAI/bge-reranker-base"):
-        print(f"[RUNNING] Loading Reranker model: '{model_name}'...")
         self.model_name = model_name
-        self.model = CrossEncoder(model_name)
-        print(f"[SUCCESS] Reranker model '{model_name}' ready!")
+        if model_name not in _RERANKER_CACHE:
+            print(f"[RUNNING] Loading Reranker model: '{model_name}'...")
+            _RERANKER_CACHE[model_name] = CrossEncoder(model_name)
+            print(f"[SUCCESS] Reranker model '{model_name}' ready!")
+        self.model = _RERANKER_CACHE[model_name]
+
 
     @staticmethod
     def _logit_to_sigmoid(logit: float) -> float:

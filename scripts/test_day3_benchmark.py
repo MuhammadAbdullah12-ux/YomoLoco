@@ -1,4 +1,10 @@
 import os
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+
+import torch
+torch.set_num_threads(1)
+
 import sys
 import json
 from qdrant_client import QdrantClient
@@ -43,11 +49,14 @@ def run_day3_benchmark():
 
     print(f"Loaded {len(questions)} evaluation queries from '{eval_path}'.\n")
 
-    # 1. Initialize components
-    hybrid_retriever = HybridRetriever(qdrant_path=qdrant_path, collection_name=collection_name)
-    client = QdrantClient(path=qdrant_path)
+    # 1. Initialize models first (prevents thread/lock conflicts)
     embedder = TextEmbedder()
     reranker = BgeReranker()
+
+    # 2. Initialize Qdrant and hybrid retriever
+    hybrid_retriever = HybridRetriever(qdrant_path=qdrant_path, collection_name=collection_name)
+    client = QdrantClient(path=qdrant_path)
+
 
     total_queries = len(questions)
     vector_only_hits = 0
