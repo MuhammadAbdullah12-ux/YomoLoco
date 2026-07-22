@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from qdrant_client import QdrantClient
 
 from ingestion.embedder import TextEmbedder
@@ -21,20 +21,18 @@ class HybridRetriever:
         self.qdrant_path = qdrant_path
         self.collection_name = collection_name
 
+        from ingestion.qdrant_store import get_qdrant_client
+        self.client = get_qdrant_client(qdrant_path)
+
         self.embedder = TextEmbedder()
         if bm25_retriever:
             self.bm25_retriever = bm25_retriever
         else:
             self.bm25_retriever = BM25Retriever(qdrant_path=qdrant_path, collection_name=collection_name)
-            
-        self.client = QdrantClient(path=qdrant_path)
 
     def close(self):
-        try:
-            if hasattr(self, "client") and self.client:
-                self.client.close()
-        except Exception:
-            pass
+        # Global client is managed at the application process level, do not close here
+        pass
 
     def _get_vector_candidates(self, query: str, top_k: int = 20, client: Optional[QdrantClient] = None) -> List[Dict[str, Any]]:
         """

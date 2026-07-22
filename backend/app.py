@@ -8,6 +8,8 @@ from contextlib import asynccontextmanager
 
 from datetime import datetime
 from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from sqlmodel import Session, select
 
 from backend.database import init_db, get_session
@@ -22,6 +24,8 @@ from pydantic import BaseModel
 async def lifespan(app: FastAPI):
     init_db()
     yield
+    from ingestion.qdrant_store import close_global_client
+    close_global_client()
 
 app = FastAPI(
     title="RepoMind RAG Backend",
@@ -29,6 +33,10 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan
 )
+
+# Ensure the static files directory exists and mount it
+os.makedirs("backend/static", exist_ok=True)
+app.mount("/static", StaticFiles(directory="backend/static"), name="static")
 
 def compute_content_hash(text: str) -> str:
     """
@@ -39,7 +47,8 @@ def compute_content_hash(text: str) -> str:
 
 @app.get("/")
 def read_root():
-    return {"status": "online", "message": "RepoMind API Engine is running"}
+    return FileResponse("backend/static/index.html")
+
 
 @app.post("/sync")
 def sync_full_pipeline(

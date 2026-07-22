@@ -47,8 +47,9 @@ class SyncPipeline:
         self.embedder = TextEmbedder()
         
         # 3. Initialize local Qdrant engine
+        from ingestion.qdrant_store import get_qdrant_client
         print(f"[RUNNING] Connecting to local Qdrant engine at '{self.qdrant_path}'...")
-        self.qdrant = QdrantClient(path=self.qdrant_path)
+        self.qdrant = get_qdrant_client(self.qdrant_path)
         
         # 4. Setup collection if missing
         try:
@@ -63,14 +64,8 @@ class SyncPipeline:
         print(f"[SUCCESS] Pipeline ready with Qdrant collection '{self.collection_name}'.")
 
     def close(self):
-        """
-        Closes connection to Qdrant local storage to release file locks.
-        """
-        try:
-            if hasattr(self, "qdrant") and self.qdrant:
-                self.qdrant.close()
-        except Exception:
-            pass
+        # Global client is managed at the application process level, do not close here
+        pass
 
     @staticmethod
     def compute_content_hash(text: str) -> str:

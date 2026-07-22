@@ -39,10 +39,8 @@ class BM25Retriever:
         Scrolls all stored points from Qdrant local database,
         extracts text payloads, tokenizes them, and initializes BM25Okapi.
         """
-        if not os.path.exists(self.qdrant_path):
-            raise FileNotFoundError(f"Qdrant database path '{self.qdrant_path}' does not exist.")
-
-        client = QdrantClient(path=self.qdrant_path)
+        from ingestion.qdrant_store import get_qdrant_client
+        client = get_qdrant_client(self.qdrant_path)
         
         # Retrieve up to 10,000 points from Qdrant collection
         try:
@@ -53,10 +51,7 @@ class BM25Retriever:
                 with_vectors=False
             )
         except Exception as e:
-            client.close()
             raise RuntimeError(f"Failed to scroll points from Qdrant collection '{self.collection_name}': {e}")
-
-        client.close()
 
         self.corpus_chunks = []
         self.tokenized_corpus = []

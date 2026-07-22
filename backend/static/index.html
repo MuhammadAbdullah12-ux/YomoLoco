@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RepoMind — Repository RAG Assistant</title>
+    <!-- Google Fonts Inter & Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Control Panel -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <h2>RepoMind</h2>
+            </div>
+            
+            <div class="panel">
+                <h3><i class="fa-solid fa-rotate-left"></i> Sync Codebase</h3>
+                <div class="sync-input-group">
+                    <input type="text" id="repo-input" value="fastapi/fastapi" placeholder="owner/repo">
+                    <button id="sync-btn"><i class="fa-solid fa-cloud-arrow-down"></i> Sync</button>
+                </div>
+                
+                <div id="sync-status-box" class="status-box idle">
+                    <div class="status-header">
+                        <span class="status-dot"></span>
+                        <span id="status-text">System Idle</span>
+                    </div>
+                    <div id="sync-details" class="status-details">
+                        Enter a GitHub repository name and sync to build or update the local indexes.
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel stats-panel">
+                <h3><i class="fa-solid fa-chart-simple"></i> System Status</h3>
+                <div class="stat-row">
+                    <span>Qdrant Store:</span>
+                    <span class="stat-val active">ONLINE</span>
+                </div>
+                <div class="stat-row">
+                    <span>SQLite Relational:</span>
+                    <span class="stat-val active">ONLINE</span>
+                </div>
+                <div class="stat-row">
+                    <span>Embedding Engine:</span>
+                    <span class="stat-val">BGE-Small</span>
+                </div>
+                <div class="stat-row">
+                    <span>Cross-Reranker:</span>
+                    <span class="stat-val">BGE-Reranker</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="main-content">
+            <header class="app-header">
+                <div class="header-info">
+                    <h1 id="current-repo-title">fastapi/fastapi</h1>
+                    <span class="header-badge"><i class="fa-solid fa-shield-halved"></i> Verified Retrieval</span>
+                </div>
+                <div class="header-actions">
+                    <button id="clear-chat-btn" title="Clear Chat History">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="chat-wrapper">
+                <div id="chat-messages" class="chat-messages">
+                    <!-- Welcome System Message -->
+                    <div class="message assistant welcome-msg">
+                        <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+                        <div class="message-content">
+                            <p>Hello! I am **RepoMind**, your intelligent repository assistant.</p>
+                            <p>I query the indexed documentation, issue comments, and PR files to provide factual, citation-backed answers. Ask me a question, or test with these popular queries:</p>
+                            <div class="sample-chips">
+                                <button class="chip" data-question="What are the two core library dependencies that FastAPI stands on?">Core dependencies?</button>
+                                <button class="chip" data-question="What does replace mutable default arg fix do?">PR default argument fix?</button>
+                                <button class="chip" data-question="How do you start a local development server?">Start dev server?</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="app-input-area">
+                <div class="input-container">
+                    <textarea id="chat-input" placeholder="Ask a question about the repository..." rows="1"></textarea>
+                    <button id="send-btn" disabled><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </footer>
+        </main>
+    </div>
+    
+    <script src="/static/app.js"></script>
+</body>
+</html>
