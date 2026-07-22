@@ -16,13 +16,23 @@ class AskPipeline:
         self,
         qdrant_path: str = "data/qdrant_db",
         collection_name: str = "repomind_collection",
-        gemini_model: str = "gemini-2.5-flash"
+        gemini_model: str = "gemini-flash-latest"
+
+
     ):
         print("[RUNNING] Initializing AskPipeline components...")
         self.retriever = HybridRetriever(qdrant_path=qdrant_path, collection_name=collection_name)
         self.reranker = BgeReranker()
         self.generator = GeminiGenerator(model_name=gemini_model)
         print("[SUCCESS] AskPipeline components initialized and ready!")
+
+    def close(self):
+        try:
+            if hasattr(self, "retriever") and self.retriever:
+                self.retriever.close()
+        except Exception:
+            pass
+
 
     def ask(self, query: str) -> Dict[str, Any]:
         """
@@ -96,9 +106,11 @@ class AskPipeline:
                 "title": item["title"],
                 "url": item["url"],
                 "snippet": item["text"][:150] + ("..." if len(item["text"]) > 150 else ""),
+                "text": item["text"],
                 "rerank_score": item.get("rerank_score"),
                 "rerank_prob": item.get("rerank_prob")
             })
+
 
         return {
             "answer": answer,

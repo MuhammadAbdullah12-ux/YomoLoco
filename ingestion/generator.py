@@ -22,7 +22,9 @@ class GeminiGenerator:
     Takes retrieved/reranked candidate document chunks and queries the Gemini LLM
     to produce a structured answer citing exact sources.
     """
-    def __init__(self, model_name: str = "gemini-2.5-flash"):
+    def __init__(self, model_name: str = "gemini-flash-latest"):
+
+
         self.model_name = model_name
         
         # Check API key configuration

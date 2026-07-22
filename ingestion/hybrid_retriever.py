@@ -26,24 +26,29 @@ class HybridRetriever:
             self.bm25_retriever = bm25_retriever
         else:
             self.bm25_retriever = BM25Retriever(qdrant_path=qdrant_path, collection_name=collection_name)
+            
+        self.client = QdrantClient(path=qdrant_path)
+
+    def close(self):
+        try:
+            if hasattr(self, "client") and self.client:
+                self.client.close()
+        except Exception:
+            pass
 
     def _get_vector_candidates(self, query: str, top_k: int = 20, client: Optional[QdrantClient] = None) -> List[Dict[str, Any]]:
         """
         Retrieves top_k candidate chunks using Dense Vector Search (Qdrant).
         """
         query_vec = self.embedder.embed_text(query)
-        close_client = False
         if client is None:
-            client = QdrantClient(path=self.qdrant_path)
-            close_client = True
+            client = self.client
 
         try:
             results = client.search(collection_name=self.collection_name, query_vector=query_vec, limit=top_k)
         except Exception:
             results = client.query_points(collection_name=self.collection_name, query=query_vec, limit=top_k).points
 
-        if close_client:
-            client.close()
 
         candidates = []
         for point in results:

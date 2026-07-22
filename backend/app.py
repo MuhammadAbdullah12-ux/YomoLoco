@@ -187,5 +187,8 @@ def ask_question(request: AskRequest):
         response = pipeline.ask(request.query)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        pipeline.close()
     return response
+
 
