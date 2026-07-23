@@ -28,6 +28,40 @@
     --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --border-radius-lg: 12px;
     --border-radius-md: 8px;
+    
+    --bg-welcome: rgba(59, 130, 246, 0.05);
+    --border-welcome: rgba(59, 130, 246, 0.15);
+    --bg-code: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="light"] {
+    --bg-app: #f3f4f6;
+    --bg-sidebar: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f9fafb;
+    
+    --border-color: #e5e7eb;
+    --border-focus: #3b82f6;
+    
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #9ca3af;
+    
+    --accent-blue: #2563eb;
+    --accent-blue-glow: rgba(37, 99, 235, 0.15);
+    
+    --accent-purple: #7c3aed;
+    --accent-green: #059669;
+    --accent-red: #dc2626;
+    
+    --bg-welcome: rgba(37, 99, 235, 0.05);
+    --border-welcome: rgba(37, 99, 235, 0.15);
+    --bg-code: rgba(0, 0, 0, 0.05);
+}
+
+/* Enable smooth background and color transitions for all UI elements */
+body, aside, main, header, footer, div, input, textarea, button, h1, h2, h3, p, span, i, a {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -295,7 +329,13 @@ body {
     gap: 6px;
 }
 
-#clear-chat-btn {
+.header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#theme-toggle-btn, #clear-chat-btn {
     background: none;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-md);
@@ -307,13 +347,20 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: var(--transition-smooth);
+}
+
+#theme-toggle-btn:hover {
+    background-color: var(--bg-card);
+    border-color: var(--accent-purple);
+    color: var(--accent-purple);
+    transform: scale(1.05);
 }
 
 #clear-chat-btn:hover {
     background-color: var(--bg-card);
     border-color: var(--accent-red);
     color: var(--accent-red);
+    transform: scale(1.05);
 }
 
 /* ==========================================================================
@@ -372,12 +419,12 @@ body {
     max-width: 85%;
     line-height: 1.6;
     font-size: 14px;
-    color: #e5e7eb;
+    color: var(--text-primary);
 }
 
 .message.user .message-content {
-    background-color: rgba(59, 130, 246, 0.05);
-    border-color: rgba(59, 130, 246, 0.15);
+    background-color: var(--bg-welcome);
+    border-color: var(--border-welcome);
     border-radius: var(--border-radius-lg) 0 var(--border-radius-lg) var(--border-radius-lg);
 }
 
@@ -391,12 +438,12 @@ body {
 }
 
 .message-content strong {
-    color: white;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
 .message-content code {
-    background-color: rgba(255, 255, 255, 0.06);
+    background-color: var(--bg-code);
     border-radius: 4px;
     font-family: var(--font-mono);
     font-size: 13px;

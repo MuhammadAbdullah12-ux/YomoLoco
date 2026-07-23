@@ -9,6 +9,7 @@ const chatMessages = document.getElementById("chat-messages");
 const chatInput = document.getElementById("chat-input");
 const sendBtn = document.getElementById("send-btn");
 const clearChatBtn = document.getElementById("clear-chat-btn");
+const themeToggleBtn = document.getElementById("theme-toggle-btn");
 
 // Initial welcome content cache to allow chat resetting
 const initialWelcomeHtml = chatMessages.innerHTML;
@@ -316,3 +317,31 @@ clearChatBtn.addEventListener("click", () => {
         chatMessages.innerHTML = initialWelcomeHtml;
     }, 300);
 });
+
+// ==========================================================================
+// 7. Light / Dark Theme Toggler
+// ==========================================================================
+function initTheme() {
+    const savedTheme = localStorage.getItem("repomind-theme") || "dark";
+    setTheme(savedTheme);
+}
+
+function setTheme(theme) {
+    if (theme === "light") {
+        document.documentElement.setAttribute("data-theme", "light");
+        themeToggleBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+        localStorage.setItem("repomind-theme", "light");
+    } else {
+        document.documentElement.removeAttribute("data-theme");
+        themeToggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+        localStorage.setItem("repomind-theme", "dark");
+    }
+}
+
+themeToggleBtn.addEventListener("click", () => {
+    const isLight = document.documentElement.getAttribute("data-theme") === "light";
+    setTheme(isLight ? "dark" : "light");
+});
+
+// Run theme setup on load
+initTheme();
