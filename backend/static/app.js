@@ -212,10 +212,22 @@ function appendAssistantResponse(data) {
             const isCited = citedIds.size === 0 || citedIds.has(src.chunk_id);
             
             if (isCited && src.url && src.url !== "N/A") {
-                const label = src.doc_type === "pr" ? `PR #${src.doc_id.split("-")[1]}` : "README Docs";
+                let iconClass = "fa-book";
+                let label = "README Docs";
+                
+                if (src.doc_type === "pr") {
+                    iconClass = "fa-code-merge";
+                    const prNum = src.doc_id.split("-")[1] || "";
+                    label = prNum ? `PR #${prNum}` : "Pull Request";
+                } else if (src.doc_type === "issue") {
+                    iconClass = "fa-circle-dot";
+                    const issueNum = src.doc_id.split("-")[1] || "";
+                    label = issueNum ? `Issue #${issueNum}` : "GitHub Issue";
+                }
+                
                 citationsList.push(`
                     <a href="${src.url}" target="_blank" class="citation-card" title="${src.title || ''}">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i> ${label}
+                        <i class="fa-solid ${iconClass}"></i> ${label}
                     </a>
                 `);
             }
@@ -296,5 +308,11 @@ document.addEventListener("click", (e) => {
 // 6. Clear/Reset Conversation History
 // ==========================================================================
 clearChatBtn.addEventListener("click", () => {
-    chatMessages.innerHTML = initialWelcomeHtml;
+    const messages = chatMessages.querySelectorAll(".message");
+    messages.forEach(msg => {
+        msg.classList.add("fade-out");
+    });
+    setTimeout(() => {
+        chatMessages.innerHTML = initialWelcomeHtml;
+    }, 300);
 });

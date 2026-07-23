@@ -231,12 +231,21 @@ body {
 }
 
 .stat-val {
-    font-weight: 500;
-    color: var(--text-muted);
+    font-weight: 600;
+    color: var(--text-secondary);
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 11px;
+    letter-spacing: 0.2px;
 }
 
 .stat-val.active {
     color: var(--accent-green);
+    background-color: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.25);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.1);
 }
 
 /* ==========================================================================
@@ -607,4 +616,10 @@ body {
 @keyframes bounce {
     0%, 80%, 100% { transform: scale(0); }
     40% { transform: scale(1); }
+}
+
+.message.fade-out {
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
 }
