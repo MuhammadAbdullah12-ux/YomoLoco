@@ -12,6 +12,8 @@ const clearChatBtn = document.getElementById("clear-chat-btn");
 const themeToggleBtn = document.getElementById("theme-toggle-btn");
 const landingScreen = document.getElementById("landing-screen");
 const enterBtn = document.getElementById("enter-btn");
+const collapseSidebarBtn = document.getElementById("collapse-sidebar-btn");
+const sidebar = document.querySelector(".sidebar");
 
 // Initial welcome content cache to allow chat resetting
 const initialWelcomeHtml = chatMessages.innerHTML;
@@ -268,7 +270,12 @@ function parseMarkdown(text) {
 
     // 2. Code blocks
     html = html.replace(/```([\s\S]*?)```/g, (match, code) => {
-        return `<pre><code>${code.trim()}</code></pre>`;
+        return `
+            <div class="code-block-container">
+                <button class="copy-code-btn"><i class="fa-regular fa-copy"></i> Copy</button>
+                <pre><code>${code.trim()}</code></pre>
+            </div>
+        `;
     });
 
     // 3. Inline code
@@ -279,7 +286,7 @@ function parseMarkdown(text) {
 
     // 5. Convert newlines to paragraphs
     html = html.split('\n\n').map(p => {
-        if (p.startsWith('<pre>')) return p; // Skip wrapping preformatted blocks
+        if (p.includes('class="code-block-container"')) return p; // Skip wrapping preformatted blocks
         return `<p>${p.replace(/\n/g, '<br>')}</p>`;
     }).join('');
 
@@ -348,6 +355,40 @@ themeToggleBtn.addEventListener("click", () => {
 // Dismiss Welcome Landing Screen Overlay
 enterBtn.addEventListener("click", () => {
     landingScreen.classList.add("hidden");
+});
+
+// Toggle Collapse/Expand Sidebar Panel
+collapseSidebarBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("collapsed");
+    const isCollapsed = sidebar.classList.contains("collapsed");
+    
+    if (isCollapsed) {
+        collapseSidebarBtn.innerHTML = '<i class="fa-solid fa-angles-right"></i>';
+    } else {
+        collapseSidebarBtn.innerHTML = '<i class="fa-solid fa-angles-left"></i>';
+    }
+});
+
+// Copy to Clipboard Delegated Handler for Code Blocks
+document.addEventListener("click", async (e) => {
+    const copyBtn = e.target.closest(".copy-code-btn");
+    if (copyBtn) {
+        const container = copyBtn.closest(".code-block-container");
+        const codeElement = container.querySelector("code");
+        const textToCopy = codeElement.innerText;
+        
+        try {
+            await navigator.clipboard.writeText(textToCopy);
+            copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+            copyBtn.classList.add("copied");
+            setTimeout(() => {
+                copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> Copy';
+                copyBtn.classList.remove("copied");
+            }, 2000);
+        } catch (err) {
+            console.error("Failed to copy code: ", err);
+        }
+    }
 });
 
 // Run theme setup on load

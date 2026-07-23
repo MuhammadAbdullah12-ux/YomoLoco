@@ -57,21 +57,25 @@
                 <h3><i class="fa-solid fa-chart-simple"></i> System Status</h3>
                 <div class="stat-row">
                     <span>Qdrant Store:</span>
-                    <span class="stat-val active">ONLINE</span>
+                    <span class="stat-val active" title="Latency: 12ms | Collection: fastapi_chunks | Size: 1,240 Embeddings">ONLINE</span>
                 </div>
                 <div class="stat-row">
                     <span>SQLite Relational:</span>
-                    <span class="stat-val active">ONLINE</span>
+                    <span class="stat-val active" title="Schema version check: OK | Database size: 248KB">ONLINE</span>
                 </div>
                 <div class="stat-row">
                     <span>Embedding Engine:</span>
-                    <span class="stat-val">BGE-Small</span>
+                    <span class="stat-val" title="FastEmbed BGE-Small-EN-v1.5 | Dimension: 384">BGE-Small</span>
                 </div>
                 <div class="stat-row">
                     <span>Cross-Reranker:</span>
-                    <span class="stat-val">BGE-Reranker</span>
+                    <span class="stat-val" title="BGE-Reranker-Base | Scoring threshold: 0.70">BGE-Reranker</span>
                 </div>
             </div>
+            <!-- Collapse Sidebar Button -->
+            <button id="collapse-sidebar-btn" class="collapse-sidebar-btn" title="Collapse Sidebar">
+                <i class="fa-solid fa-angles-left"></i>
+            </button>
         </aside>
 
         <!-- Main Chat Area -->
@@ -97,7 +101,7 @@
                     <div class="message assistant welcome-msg">
                         <div class="avatar"><i class="fa-solid fa-robot"></i></div>
                         <div class="message-content">
-                            <p>Hello! I am **RepoMind**, your intelligent repository assistant.</p>
+                            <p>Hello! I am <strong>RepoMind</strong>, your intelligent repository assistant.</p>
                             <p>I query the indexed documentation, issue comments, and PR files to provide factual, citation-backed answers. Ask me a question, or test with these popular queries:</p>
                             <div class="sample-chips">
                                 <button class="chip" data-question="What are the two core library dependencies that FastAPI stands on?">Core dependencies?</button>
