@@ -10,6 +10,8 @@ const chatInput = document.getElementById("chat-input");
 const sendBtn = document.getElementById("send-btn");
 const clearChatBtn = document.getElementById("clear-chat-btn");
 const themeToggleBtn = document.getElementById("theme-toggle-btn");
+const landingScreen = document.getElementById("landing-screen");
+const enterBtn = document.getElementById("enter-btn");
 
 // Initial welcome content cache to allow chat resetting
 const initialWelcomeHtml = chatMessages.innerHTML;
@@ -341,6 +343,11 @@ function setTheme(theme) {
 themeToggleBtn.addEventListener("click", () => {
     const isLight = document.documentElement.getAttribute("data-theme") === "light";
     setTheme(isLight ? "dark" : "light");
+});
+
+// Dismiss Welcome Landing Screen Overlay
+enterBtn.addEventListener("click", () => {
+    landingScreen.classList.add("hidden");
 });
 
 // Run theme setup on load
