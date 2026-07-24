@@ -21,7 +21,26 @@
             </div>
             <h1>Welcome to RepoMind</h1>
             <p>Your intelligent, citation-backed repository search and assistant engine. Chat with codebase documentation, issues, and PR comments in real-time.</p>
-            <button id="enter-btn">Get Started <i class="fa-solid fa-arrow-right-long"></i></button>
+            
+            <div class="landing-features">
+                <div class="feature-badge"><i class="fa-solid fa-bolt"></i> Hybrid Search</div>
+                <div class="feature-badge"><i class="fa-solid fa-book"></i> Citations Tracker</div>
+                <div class="feature-badge"><i class="fa-solid fa-lock"></i> Local Indexing</div>
+            </div>
+
+            <div class="landing-input-group">
+                <input type="text" id="landing-repo-input" placeholder="Enter owner/repo (e.g. fastapi/fastapi)...">
+                <button id="landing-sync-btn">Sync & Chat <i class="fa-solid fa-arrow-right-long"></i></button>
+            </div>
+
+            <div class="landing-chips-section">
+                <span>Try a popular repository:</span>
+                <div class="landing-demo-chips">
+                    <button class="landing-chip" data-repo="fastapi/fastapi"><i class="fa-solid fa-bolt"></i> fastapi/fastapi</button>
+                    <button class="landing-chip" data-repo="langchain-ai/langchain"><i class="fa-solid fa-robot"></i> langchain-ai/langchain</button>
+                    <button class="landing-chip" data-repo="psf/requests"><i class="fa-solid fa-spider"></i> psf/requests</button>
+                </div>
+            </div>
         </div>
     </div>
 

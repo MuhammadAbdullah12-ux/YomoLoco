@@ -11,7 +11,8 @@ const sendBtn = document.getElementById("send-btn");
 const clearChatBtn = document.getElementById("clear-chat-btn");
 const themeToggleBtn = document.getElementById("theme-toggle-btn");
 const landingScreen = document.getElementById("landing-screen");
-const enterBtn = document.getElementById("enter-btn");
+const landingRepoInput = document.getElementById("landing-repo-input");
+const landingSyncBtn = document.getElementById("landing-sync-btn");
 const collapseSidebarBtn = document.getElementById("collapse-sidebar-btn");
 const sidebar = document.querySelector(".sidebar");
 
@@ -352,9 +353,28 @@ themeToggleBtn.addEventListener("click", () => {
     setTheme(isLight ? "dark" : "light");
 });
 
-// Dismiss Welcome Landing Screen Overlay
-enterBtn.addEventListener("click", () => {
-    landingScreen.classList.add("hidden");
+// Landing Sync & Chat event handler
+landingSyncBtn.addEventListener("click", () => {
+    const repo = landingRepoInput.value.trim();
+    if (repo) {
+        repoInput.value = repo;
+        landingScreen.classList.add("hidden");
+        syncBtn.click();
+    } else {
+        landingScreen.classList.add("hidden");
+    }
+});
+
+// Popular landing demo chips click handler
+document.addEventListener("click", (e) => {
+    const chip = e.target.closest(".landing-chip");
+    if (chip) {
+        const repo = chip.getAttribute("data-repo");
+        if (repo) {
+            landingRepoInput.value = repo;
+            landingSyncBtn.click();
+        }
+    }
 });
 
 // Toggle Collapse/Expand Sidebar Panel

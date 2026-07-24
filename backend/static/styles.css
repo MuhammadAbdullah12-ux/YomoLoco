@@ -681,12 +681,24 @@ body {
     left: 0;
     height: 100vh;
     width: 100vw;
-    background: radial-gradient(circle at center, var(--bg-card), var(--bg-app));
+    background-image: 
+        radial-gradient(circle at center, var(--bg-card), var(--bg-app)),
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+    background-size: 100% 100%, 24px 24px, 24px 24px;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 9999;
     transition: transform 0.6s cubic-bezier(0.85, 0, 0.15, 1), opacity 0.6s ease-in-out;
+}
+
+[data-theme="light"] .landing-screen {
+    background-image: 
+        radial-gradient(circle at center, var(--bg-card), var(--bg-app)),
+        linear-gradient(rgba(0, 0, 0, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.015) 1px, transparent 1px);
+    background-size: 100% 100%, 24px 24px, 24px 24px;
 }
 
 .landing-screen.hidden {
@@ -697,18 +709,30 @@ body {
 
 .landing-content {
     text-align: center;
-    max-width: 520px;
-    padding: 40px;
-    background: rgba(21, 24, 30, 0.3);
-    backdrop-filter: blur(20px);
+    width: 100%;
+    max-width: 580px;
+    padding: 44px;
+    background: rgba(21, 24, 30, 0.35);
+    backdrop-filter: blur(24px);
     border: 1px solid var(--border-color);
-    border-radius: 20px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    border-radius: 24px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 24px;
-    animation: fadeIn 0.8s ease-out;
+    animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 [data-theme="light"] .landing-content {
@@ -725,8 +749,9 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 38px;
-    box-shadow: 0 8px 24px var(--accent-blue-glow);
+    box-shadow: 0 0 35px var(--accent-blue-glow);
     animation: pulse-logo 2s infinite ease-in-out;
+    filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.45));
 }
 
 .landing-content h1 {
@@ -742,26 +767,143 @@ body {
     color: var(--text-secondary);
 }
 
-#enter-btn {
+/* Landing Features Section */
+.landing-features {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 8px 0;
+}
+
+.feature-badge {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+[data-theme="light"] .feature-badge {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Landing Sync Input Bar */
+.landing-input-group {
+    display: flex;
+    width: 100%;
+    max-width: 440px;
+    gap: 8px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: 6px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .landing-input-group {
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+#landing-repo-input {
+    flex-grow: 1;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    padding: 8px 12px;
+    outline: none;
+    min-width: 0;
+}
+
+#landing-repo-input::placeholder {
+    color: var(--text-muted);
+}
+
+#landing-sync-btn {
     background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
     border: none;
     border-radius: var(--border-radius-md);
     color: white;
     font-family: var(--font-sans);
     font-weight: 700;
-    font-size: 15px;
-    padding: 14px 28px;
+    font-size: 13px;
+    padding: 10px 20px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
     transition: var(--transition-smooth);
-    box-shadow: 0 4px 14px var(--accent-blue-glow);
+    box-shadow: 0 4px 10px var(--accent-blue-glow);
+    flex-shrink: 0;
 }
 
-#enter-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px var(--accent-blue-glow);
+#landing-sync-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(59, 130, 246, 0.4);
+}
+
+#landing-sync-btn:hover i {
+    transform: translateX(3px);
+}
+
+/* Popular repos demo section */
+.landing-chips-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.landing-chips-section span {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.landing-demo-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.landing-chip {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition-smooth);
+}
+
+.landing-chip:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--accent-blue);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.1);
+}
+
+[data-theme="light"] .landing-chip {
+    background: rgba(0, 0, 0, 0.02);
+}
+[data-theme="light"] .landing-chip:hover {
+    background: rgba(0, 0, 0, 0.04);
 }
 
 @keyframes pulse-logo {
